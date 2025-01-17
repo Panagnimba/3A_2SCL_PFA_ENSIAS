@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap">
-    <title>Genetic Algorithm Solver</title>
     <style>
         * {
             margin: 0;
@@ -13,19 +13,23 @@
         }
 
         body {
-            font-family: 'Open Sans', sans-serif;
+            padding: 20px;
             background: linear-gradient(to right, #2c3e50, #4ca1af);
-            color: #fff;
+            background-repeat: no-repeat;
+            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            background-color: #072F64;
             flex-direction: column;
+            font-family: 'Open Sans', sans-serif;
         }
 
-        .container {
+        .content-wrapper {
+            margin-top: 50px;
             width: 100%;
-            max-width: 700px;
+            max-width: 550px;
             background-color: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
@@ -34,108 +38,109 @@
 
         h1 {
             text-align: center;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+            color: white;
+            font-size: 1.5em;
+        }
+
+        p,
+        label {
+            text-align: left;
+            color: white;
+            font-size: 1em;
         }
 
         form {
-            display: flex;
-            flex-direction: column;
+            margin-top: 15px;
+            padding: 20px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            position: relative;
+            margin-bottom: 20px;
         }
 
-        label {
-            font-size: 1rem;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        input, textarea {
-            width: 100%;
+        .form-group input {
+            width: calc(100% - 20px);
             padding: 10px;
-            font-size: 1rem;
+            font-size: 14px;
+            color: #fff;
             border: none;
             border-bottom: 2px solid #fff;
-            background-color: transparent;
-            color: #fff;
             outline: none;
+            background-color: transparent;
         }
 
-        input[type="number"] {
-            appearance: textfield;
+        .form-group label {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            font-size: 14px;
+            color: #fff;
         }
 
-        button {
+        button.styled-button {
+            width: 100%;
             margin-top: 20px;
             padding: 10px;
-            font-size: 1rem;
-            background-color: #4CAF50;
-            color: #fff;
-            border: none;
+            color: #ffffff;
+            font-size: 16px;
+            text-transform: uppercase;
+            background-color: green;
             border-radius: 5px;
+            border: none;
             cursor: pointer;
         }
 
-        button:hover {
-            background-color: #45a049;
-            transition: background-color 0.3s;
+        button.styled-button:hover {
+            background-color: rgb(35, 145, 35);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition-duration: 0.3s;
         }
 
-        .info {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-
-        input[type="file"] {
-            padding: 10px;
-            background-color: transparent;
-            color: #fff;
-            border: none;
-            border-bottom: 2px solid #fff;
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-top: -10px;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Genetic Algorithm Solver</h1>
-        <form action="/solve_genetic_algorithm" method="POST" enctype="multipart/form-data">
-            <!-- Population size -->
+    <div class="content-wrapper">
+        <h1>Genetic Solver</h1>
+        <form action="/solve_genetic_algorithm" method="post">
             <div class="form-group">
-                <label for="population_size">Population Size</label>
-                <input type="number" id="population_size" name="population_size" min="1" required>
+                <input type="number" id="num_levels" name="num_levels" required>
+                <label for="num_levels">Number of Levels:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="num_facilities" name="num_facilities" required>
+                <label for="num_facilities">Number of Facilities:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="num_clients" name="num_clients" required>
+                <label for="num_clients">Number of Clients:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="num_cap_levels" name="num_cap_levels" required>
+                <label for="num_cap_levels">Number of Capacity Levels:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="pop_size" name="pop_size" required>
+                <label for="pop_size">Population Size:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="num_generations" name="num_generations" required>
+                <label for="num_generations">Number of Generations:</label>
             </div>
 
-            <!-- Number of generations -->
-            <div class="form-group">
-                <label for="num_generations">Number of Generations</label>
-                <input type="number" id="num_generations" name="num_generations" min="1" required>
-            </div>
+            <button type="submit" class="styled-button">Solve</button>
 
-            <!-- File upload for JSON data -->
-            <div class="form-group">
-                <label for="data_file">Upload JSON Data File</label>
-                <input type="file" id="data_file" name="data_file" accept=".json" required>
-            </div>
-
-            <button type="submit">Solve</button>
+            {% if error_message %}
+            <p class="error-message">{{ error_message }}</p>
+            {% endif %}
         </form>
-        <div class="info">
-            <p>Note: You can upload a JSON file containing the necessary data.</p>
-            <p>Ensure the file follows the expected format, such as:</p>
-            <pre><code>{
-  "population_size": 100,
-  "num_generations": 50,
-  "costs": {"0": {"0,0": 10, "0,1": 15}, "1": {"1,0": 20}},
-  "capacities": {"0": [[10, 20], [30, 40]], "1": [[15, 25], [35, 45]]},
-  "demand": [100, 150, 200],
-  "budget": 500,
-  "opening_costs": {"0": [[5, 10], [15, 20]], "1": [[10, 20], [25, 30]]}
-}</code></pre>
-        </div>
     </div>
 </body>
+
 </html>

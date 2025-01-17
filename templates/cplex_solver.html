@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,7 +42,8 @@
             font-size: 1.5em;
         }
 
-        p, label {
+        p,
+        label {
             text-align: left;
             color: white;
             font-size: 1em;
@@ -54,7 +56,7 @@
 
         .form-group {
             position: relative;
-            margin-bottom: 20px; 
+            margin-bottom: 20px;
         }
 
         .form-group input {
@@ -79,12 +81,12 @@
         button.styled-button {
             width: 100%;
             margin-top: 20px;
-            padding: 10px; 
+            padding: 10px;
             color: #ffffff;
             font-size: 16px;
-            text-transform: uppercase; 
+            text-transform: uppercase;
             background-color: green;
-            border-radius: 5px; 
+            border-radius: 5px;
             border: none;
             cursor: pointer;
         }
@@ -96,58 +98,49 @@
         }
 
         .error-message {
-            color: red; 
-            text-align: center; 
+            color: red;
+            text-align: center;
             margin-top: -10px;
         }
     </style>
 </head>
+
 <body>
     <div class="content-wrapper">
         <h1>CPLEX Solver</h1>
-        <form action="/solve_cplex" method="post">
+        <form action="/solve_cplex_algorithm" method="post">
             <div class="form-group">
-                <input type="number" id="level" name="level" min="2" max="3" required>
-                <label for="level">Enter Level:</label>
+                <input type="number" id="num_levels" name="num_levels" required>
+                <label for="num_levels">Number of Levels:</label>
             </div>
             <div class="form-group">
-                <input type="number" id="N" name="N" required>
-                <label for="N">Enter value for N:</label>
+                <input type="number" id="num_facilities" name="num_facilities" required>
+                <label for="num_facilities">Number of Facilities:</label>
             </div>
             <div class="form-group">
-                <input type="number" id="nwh" name="nwh" required>
-                <label for="nwh">Enter value for nwh:</label>
+                <input type="number" id="num_clients" name="num_clients" required>
+                <label for="num_clients">Number of Clients:</label>
             </div>
             <div class="form-group">
-                <input type="number" id="nfact" name="nfact" required>
-                <label for="nfact">Enter value for nfact:</label>
+                <input type="number" id="num_cap_levels" name="num_cap_levels" required>
+                <label for="num_cap_levels">Number of Capacity Levels:</label>
             </div>
             <div class="form-group">
-                <input type="number" id="K" name="K" required>
-                <label for="K">Enter value for K:</label>
+                <input type="number" id="pop_size" name="pop_size" required>
+                <label for="pop_size">Population Size:</label>
             </div>
             <div class="form-group">
-                <input type="number" id="S" name="S" required>
-                <label for="S">Enter value for S:</label>
+                <input type="number" id="num_generations" name="num_generations" required>
+                <label for="num_generations">Number of Generations:</label>
             </div>
-            <div class="form-group">
-                <input type="number" id="nr" name="nr" required>
-                <label for="nr">Enter value for nr:</label>
-            </div>
-            <div class="form-group">
-                <input type="number" id="R" name="R" required>
-                <label for="R">Enter value for R:</label>
-            </div>
-            <div class="form-group">
-                <input type="number" id="B" name="B" required>
-                <label for="B">Enter value for B:</label>
-            </div>
+
             <button type="submit" class="styled-button">Solve</button>
 
             {% if error_message %}
-                <p class="error-message">{{ error_message }}</p>
+            <p class="error-message">{{ error_message }}</p>
             {% endif %}
         </form>
     </div>
 </body>
+
 </html>

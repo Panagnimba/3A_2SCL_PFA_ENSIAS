@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPLEX Solver Results</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #2c3e50, #4ca1af);
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .solution-list {
+            margin-top: 15px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .solution-list li {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: green;
+            text-decoration: none;
+            font-size: 1em;
+            border-radius: 5px;
+        }
+
+        .back-button:hover {
+            background-color: #28a745;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Genetic Solver Results</h1>
+        <p><strong>Best Fitness:</strong> {{ best_fitness }}</p>
+        <p><strong>Best Solution:</strong></p>
+        <ul class="solution-list">
+            {% for value in best_solution %}
+                <li>{{ value }}</li>
+            {% endfor %}
+        </ul>
+        <a href="/" class="back-button">Back to Form</a>
+    </div>
+</body>
+</html>
