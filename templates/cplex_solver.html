@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            padding: 20px;
+            background: linear-gradient(to right, #2c3e50, #4ca1af);
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #072F64;
+            flex-direction: column;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .content-wrapper {
+            margin-top: 50px;
+            width: 100%;
+            max-width: 550px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+        }
+
+        p, label {
+            text-align: left;
+            color: white;
+            font-size: 1em;
+        }
+
+        form {
+            margin-top: 15px;
+            padding: 20px;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 20px; 
+        }
+
+        .form-group input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            font-size: 14px;
+            color: #fff;
+            border: none;
+            border-bottom: 2px solid #fff;
+            outline: none;
+            background-color: transparent;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        button.styled-button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px; 
+            color: #ffffff;
+            font-size: 16px;
+            text-transform: uppercase; 
+            background-color: green;
+            border-radius: 5px; 
+            border: none;
+            cursor: pointer;
+        }
+
+        button.styled-button:hover {
+            background-color: rgb(35, 145, 35);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition-duration: 0.3s;
+        }
+
+        .error-message {
+            color: red; 
+            text-align: center; 
+            margin-top: -10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <h1>CPLEX Solver</h1>
+        <form action="/solve_cplex" method="post">
+            <div class="form-group">
+                <input type="number" id="level" name="level" min="2" max="3" required>
+                <label for="level">Enter Level:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="N" name="N" required>
+                <label for="N">Enter value for N:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="nwh" name="nwh" required>
+                <label for="nwh">Enter value for nwh:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="nfact" name="nfact" required>
+                <label for="nfact">Enter value for nfact:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="K" name="K" required>
+                <label for="K">Enter value for K:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="S" name="S" required>
+                <label for="S">Enter value for S:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="nr" name="nr" required>
+                <label for="nr">Enter value for nr:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="R" name="R" required>
+                <label for="R">Enter value for R:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="B" name="B" required>
+                <label for="B">Enter value for B:</label>
+            </div>
+            <button type="submit" class="styled-button">Solve</button>
+
+            {% if error_message %}
+                <p class="error-message">{{ error_message }}</p>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>
