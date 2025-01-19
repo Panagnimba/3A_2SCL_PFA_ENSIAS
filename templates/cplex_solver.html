@@ -110,36 +110,36 @@
         <h1>CPLEX Solver</h1>
         <form action="/solve_cplex_algorithm" method="post">
             <div class="form-group">
-                <input type="number" id="num_levels" name="num_levels" required>
-                <label for="num_levels">Number of Levels:</label>
+                <input type="number" id="N" name="N" required>
+                <label for="N">Nombre de Clients (N):</label>
             </div>
             <div class="form-group">
-                <input type="number" id="num_facilities" name="num_facilities" required>
-                <label for="num_facilities">Number of Facilities:</label>
+                <input type="number" id="nfact" name="nfact" required>
+                <label for="nfact">Nombre d'Usines (nfact):</label>
             </div>
             <div class="form-group">
-                <input type="number" id="num_clients" name="num_clients" required>
-                <label for="num_clients">Number of Clients:</label>
+                <input type="number" id="nwh" name="nwh" required>
+                <label for="nwh">Nombre d'Entrepôts (nwh):</label>
             </div>
             <div class="form-group">
-                <input type="number" id="num_cap_levels" name="num_cap_levels" required>
-                <label for="num_cap_levels">Number of Capacity Levels:</label>
+                <input type="number" id="K" name="K" required>
+                <label for="K">Nombre de Niveaux de Capacité pour les Entrepôts (K):</label>
             </div>
             <div class="form-group">
-                <input type="number" id="pop_size" name="pop_size" required>
-                <label for="pop_size">Population Size:</label>
+                <input type="number" id="S" name="S" required>
+                <label for="S">Nombre de Niveaux de Capacité pour les Usines (S):</label>
             </div>
             <div class="form-group">
-                <input type="number" id="num_generations" name="num_generations" required>
-                <label for="num_generations">Number of Generations:</label>
+                <input type="number" id="B" name="B" required>
+                <label for="B">Budget Total (B):</label>
             </div>
-
-            <button type="submit" class="styled-button">Solve</button>
-
+        
+            <button type="submit" class="styled-button">Résoudre</button>
+        
             {% if error_message %}
             <p class="error-message">{{ error_message }}</p>
             {% endif %}
-        </form>
+        </form>        
     </div>
 </body>
 

@@ -131,7 +131,10 @@ def repair_solution(solution, capacities, demand):
     return y, x
 
 # Genetic algorithm
+# Array to store the best fitness at each generation
+ 
 def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budget, opening_costs):
+    fitness_history = [] 
     num_levels = len(capacities)
     num_facilities = capacities[0].shape[0]
     num_clients = len(demand)
@@ -192,11 +195,13 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
 
         population.extend(new_population)
         print(f"Generation {generation}, Best fitness: {best_fitness}")
+        fitness_history.append((generation, best_fitness))  # Append to the array
+
 
 
         
 
-    return best_solution, best_fitness
+    return best_solution, best_fitness,fitness_history
 
 # Run the algorithm
 # num_levels = 5
@@ -218,6 +223,7 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
 @app.route('/solve_genetic_algorithm', methods=['POST'])
 def solve_genetic():
     try:
+       
        # Extract form data
         num_levels = int(request.form['num_levels'])
         num_facilities = int(request.form['num_facilities'])
@@ -231,19 +237,16 @@ def solve_genetic():
                 num_levels, num_facilities, num_clients, num_cap_levels
             )
 
-        best_solution, best_fitness = genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budget, opening_costs)
+        best_solution, best_fitness,fitness_history = genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budget, opening_costs)
         print("Best solution found:", best_solution)
+        # print("fitness array", fitness_history)
         print("Best fitness value:", best_fitness)
 
          # Return the results as JSON
-        return render_template('result.html', best_solution=best_solution, best_fitness=best_fitness)
-
+        return render_template('result.html', best_solution=best_solution, best_fitness=best_fitness,fitness_history=fitness_history)
 
     except Exception as e:
         return render_template('index.html', error_message=f"Error: {str(e)}")
-
-
-
 
 
 

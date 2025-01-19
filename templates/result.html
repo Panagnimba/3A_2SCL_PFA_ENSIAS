@@ -69,11 +69,26 @@
     <div class="container">
         <h1>Genetic Solver Results</h1>
         <p><strong>Best Fitness:</strong> {{ best_fitness }}</p>
+        <p><strong>Fitnes history:</strong></p>
+        <ul class="solution-list">
+            {% for generation, fitness in fitness_history %}
+                <li>Generation {{ generation }} => Best fitness: {{ "{:.2f}".format(fitness) }}</li>
+            {% endfor %}
+        </ul>
         <p><strong>Best Solution:</strong></p>
         <ul class="solution-list">
-            {% for value in best_solution %}
+            <table class="matrix-table">
+                {% for row in best_solution %}
+                <tr>
+                    {% for cell in row %}
+                    <td>[{{ cell[0] }} {{ cell[1] }}]</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <!-- {% for value in best_solution %}
                 <li>{{ value }}</li>
-            {% endfor %}
+            {% endfor %} -->
         </ul>
         <a href="/" class="back-button">Back to Form</a>
     </div>
