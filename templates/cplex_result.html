@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPLEX Solver Results</title>
+    <title>Cplex Solver Results</title>
     <style>
         body {
             margin: 0;
@@ -11,8 +11,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            
             background: linear-gradient(to right, #2c3e50, #4ca1af);
             color: #fff;
+            overflow: scroll;
         }
 
         .container {
@@ -21,29 +23,29 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 80%;
         }
 
-        h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        p {
-            font-size: 1.2em;
+        h1, h2, h3 {
             margin: 10px 0;
         }
 
-        .solution-list {
-            margin-top: 15px;
-            list-style: none;
-            padding: 0;
+        table {
+            width: 100%;
+            overflow: scroll;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
 
-        .solution-list li {
+        th, td {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px;
+            text-align: center;
             background-color: rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         .back-button {
@@ -66,29 +68,28 @@
 </head>
 <body>
     <div class="container">
-        <h1>Genetic Solver Results</h1>
-        <p><strong>Best Fitness:</strong> {{ best_fitness }}</p>
-        <p><strong>Fitnes history:</strong></p>
-        <ul class="solution-list">
-            {% for generation, fitness in fitness_history %}
-                <li>Generation {{ generation }} => Best fitness: {{ "{:.2f}".format(fitness) }}</li>
-            {% endfor %}
-        </ul>
-        <p><strong>Best Solution:</strong></p>
-        <ul class="solution-list">
-            <table class="matrix-table">
-                {% for row in best_solution %}
+        <h1>Cplex Solver Results</h1>
+        <h2>Objective Value: {{ data.objective_value }}</h2>
+        <h2>Solution Status: {{ data.solution_status }}</h2>
+
+        <h3>Variable Values</h3>
+        <table>
+            <thead>
                 <tr>
-                    {% for cell in row %}
-                    <td>[{{ cell[0] }} {{ cell[1] }}]</td>
-                    {% endfor %}
+                    <th>Variable</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for name, value in data.variable_values.items() %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ value }}</td>
                 </tr>
                 {% endfor %}
-            </table>
-            <!-- {% for value in best_solution %}
-                <li>{{ value }}</li>
-            {% endfor %} -->
-        </ul>
+            </tbody>
+        </table>
+
         <a href="/" class="back-button">Back to Form</a>
     </div>
 </body>

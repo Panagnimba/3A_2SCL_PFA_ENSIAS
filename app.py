@@ -26,33 +26,154 @@ def genetic_solver():
 
 
 
+from cplex import Cplex
+from cplex.exceptions import CplexError
+from cplex import SparsePair
 @app.route('/solve_cplex_algorithm', methods=['POST'])
 def solve_genetic_algorithm():
+
+    # Problem Parameters
+    N = 5  # Number of clients
+    nfact = 3  # Number of factories
+    nwh = 4  # Number of warehouses
+    K = 3  # Capacity levels for warehouses
+    L = 5  # Assignment levels
+
+    clients = range(1, N + 1)
+    warehouses = range(1, nwh + 1)
+    levels = range(1, L + 1)
+    cap_levels = range(1, K + 1)
+
+    # Data
+    d = {i: 10 for i in clients}  # Demand per client
+    u_wh = {(i, k): 20 for i in warehouses for k in cap_levels}  # Warehouse capacity
+    f_wh = {(i, k): 50 for i in warehouses for k in cap_levels}  # Warehouse opening costs
+    c = {(i, j, l): 5 for i in warehouses for j in clients for l in levels}  # Cost warehouse-client
+    B = 5000  # Total budget
+
+    # Initialize CPLEX problem
+    problem = Cplex()
+    problem.set_problem_type(Cplex.problem_type.LP)
+
+    # Decision Variables
+    x = {}
+    y = {}
+
+    # Add variables for warehouse-client assignment
+    for i in warehouses:
+        for j in clients:
+            for l in levels:
+                var_name = f"x_{i}_{j}_{l}"
+                x[(i, j, l)] = var_name
+                problem.variables.add(names=[var_name], types="C", lb=[0])
+
+    # Add variables for warehouse opening
+    for i in warehouses:
+        for k in cap_levels:
+            for l in levels:
+                var_name = f"y_{i}_{k}_{l}"
+                y[(i, k, l)] = var_name
+                problem.variables.add(names=[var_name], types="B", lb=[0], ub=[1])
+
+    # Objective Function: Minimize total cost
+    objective = []
+    for i in warehouses:
+        for j in clients:
+            for l in levels:
+                objective.append((x[(i, j, l)], c[(i, j, l)]))
+        for k in cap_levels:
+            for l in levels:
+                objective.append((y[(i, k, l)], f_wh[(i, k)]))
+
+    problem.objective.set_linear(objective)
+    problem.objective.set_sense(problem.objective.sense.minimize)
+
+    # Constraints
+
+    # Constraint 1: Each client assigned to at least one warehouse at each level
+    for j in clients:
+        for l in levels:
+            constraint = [(x[(i, j, l)], 1) for i in warehouses]
+            problem.linear_constraints.add(
+                lin_expr=[SparsePair(*zip(*constraint))],
+                senses="E",
+                rhs=[d[j]],
+            )
+
+    # Constraint 2: Warehouse capacity at each level
+    for i in warehouses:
+        for l in levels:
+            constraint = [(x[(i, j, l)], 1) for j in clients]
+            for k in cap_levels:
+                constraint.append((y[(i, k, l)], -u_wh[(i, k)]))
+            problem.linear_constraints.add(
+                lin_expr=[SparsePair(*zip(*constraint))],
+                senses="L",
+                rhs=[0],
+            )
+
+    # Constraint 3: Limit one capacity level per warehouse per level
+    for i in warehouses:
+        for l in levels:
+            constraint = [(y[(i, k, l)], 1) for k in cap_levels]
+            problem.linear_constraints.add(
+                lin_expr=[SparsePair(*zip(*constraint))],
+                senses="L",
+                rhs=[1],
+            )
+
+    # Constraint 4: Total budget
+    constraint = []
+    for i in warehouses:
+        for k in cap_levels:
+            for l in levels:
+                constraint.append((y[(i, k, l)], f_wh[(i, k)]))
+    problem.linear_constraints.add(
+        lin_expr=[SparsePair(*zip(*constraint))],
+        senses="L",
+        rhs=[B],
+    )
+
+    # Constraint 5: Balance flow across levels
+    for j in clients:
+        for l in levels:
+            if l > 1:
+                constraint = [(x[(i, j, l)], 1) for i in warehouses]
+                constraint += [(x[(i, j, l - 1)], -1) for i in warehouses]
+                problem.linear_constraints.add(
+                    lin_expr=[SparsePair(*zip(*constraint))],
+                    senses="G",
+                    rhs=[0],
+                )
+
+    # Solve the problem
     try:
-            if 'data_file' not in request.files:
-                return jsonify({'error': 'No file part'}), 400
-                
-            file = request.files['data_file']
+        problem.solve()
+        best_solution =  problem.solution.get_objective_value()
+        solution_status = problem.solution.get_status_string()
+        print("Solution status:", solution_status)
+        print("Objective value:",best_solution)
 
-            if file.filename == '':
-                return jsonify({'error': 'No selected file'}), 400
+        # Print variable values
+        variable_values = problem.solution.get_values()
+        variable_names = problem.variables.get_names()
 
-            # Vérifier que le fichier est un fichier JSON
-            if file and file.filename.endswith('.json'):
-                # Lire directement le fichier en mémoire
-                data = json.load(file)         
-                 # Accessing and printing each data part
-                print("Population Size:", data.get('population_size'))
-                print("Number of Generations:", data.get('num_generations'))
-            # Réponse avec les données traitées
-            return jsonify({'message': 'File processed successfully!', 'data': data}), 200
-    except json.JSONDecodeError:
-        return jsonify({'error': 'Invalid JSON format'}), 400
-       
+        # print("\nVariable values:")
+        # for name, value in zip(variable_names, variable_values):
+        #     print(f"{name}: {value}")
+         # Prepare response
+        response = {
+            "solution_status": solution_status,
+            "objective_value": best_solution,
+            "variable_values": {name: value for name, value in zip(variable_names, variable_values)},
+        }
+        print(response["variable_values"])
+        return render_template('cplex_result.html', data=response)
 
+    except CplexError as e:
+        print("CPLEX Error:", e)
 
-import numpy as np
-import random
+    
 
 # Generate problem data
 def generate_problem_data(num_levels, num_facilities, num_clients, num_cap_levels):
@@ -247,6 +368,9 @@ def solve_genetic():
 
     except Exception as e:
         return render_template('index.html', error_message=f"Error: {str(e)}")
+
+
+
 
 
 
