@@ -6,6 +6,7 @@ from flask import Flask, render_template, request,jsonify
 import csv
 import os
 import json
+import ast
 
 app = Flask(__name__)
 app.debug = True  # Enables auto-reload
@@ -191,10 +192,12 @@ def generate_problem_data(num_levels, num_facilities, num_clients, num_cap_level
         np.random.randint(10, 30, size=(num_facilities, num_cap_levels))
         for _ in range(num_levels)
     ]
+
     return costs, capacities, demand, budget, opening_costs
 
 # Evaluate fitness
 def evaluate_fitness(solution, costs, capacities, demand, budget, opening_costs):
+  
     y, x = solution
     total_cost = 0
     penalty = 0
@@ -260,6 +263,7 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
     num_facilities = capacities[0].shape[0]
     num_clients = len(demand)
     num_cap_levels = capacities[0].shape[1]
+   
 
     def initialize_population():
         population = []
@@ -268,14 +272,14 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
             x = np.random.rand(num_levels, num_facilities, num_clients)
             population.append((y, x))
         return population
-
+    
     def tournament_selection(population, fitness_scores, k=3):
         selected = []
         for _ in range(len(population)):
             tournament = random.sample(list(zip(fitness_scores, population)), k)
             selected.append(min(tournament, key=lambda x: x[0])[1])
         return selected
-
+    
     def crossover(parent1, parent2):
         crossover_point = random.randint(1, num_levels - 1)
         y_child = np.vstack((parent1[0][:crossover_point], parent2[0][crossover_point:]))
@@ -289,12 +293,14 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
                 if random.random() < mutation_rate:
                     y[l][i] = 1 - y[l][i]
         return y, x
-
+   
     population = initialize_population()
+    print(population)
     best_solution = None
     best_fitness = float('inf')
 
     for generation in range(num_generations):
+    
         fitness_scores = [
             evaluate_fitness(sol, costs, capacities, demand, budget, opening_costs)
             for sol in population
@@ -341,6 +347,69 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
 # print("Best fitness value:", best_fitness)
 
 
+
+
+def save_data(data, output_file):
+    # Helper function to process individual items in the data
+    def process_item(item):
+        if isinstance(item, dict):
+            # Convert tuple keys to string keys
+            return {str(key): value for key, value in item.items()}
+        elif isinstance(item, np.ndarray):
+            # Convert numpy array to list
+            return item.tolist()
+        elif isinstance(item, list):
+            # Recursively process list items
+            return [process_item(sub_item) for sub_item in item]
+        else:
+            # Return the item as is if it's not a dict or numpy array
+            return item
+
+    # Process the main data dictionary before saving
+    processed_data = {key: process_item(value) for key, value in data.items()}
+
+    # Save the processed data to a JSON file
+    with open(output_file, "w", encoding="utf-8") as file:
+        json.dump(processed_data, file, indent=4)
+        print(f"Data successfully saved to {output_file}")
+
+
+
+def load_data(input_file):
+    # Helper function to process individual items in the data
+    def process_item(item):
+        if isinstance(item, dict):
+            # Convert string keys (like '(0, 0)') into tuple keys (like (0, 0))
+            return {ast.literal_eval(key): value for key, value in item.items()}
+        elif isinstance(item, list):
+            # Convert lists back to numpy arrays if needed
+            # Recursively process nested lists
+            return np.array([process_item(sub_item) for sub_item in item])
+        else:
+            # Return the item as is if it's not a dict or list
+            return item
+
+    # Load the JSON file
+    with open(input_file, "r", encoding="utf-8") as file:
+        raw_data = json.load(file)
+
+    # Process the loaded data
+    processed_data = {key: process_item(value) for key, value in raw_data.items()}
+
+    # Convert specific fields to numpy arrays if necessary
+    processed_data["capacities"] = [np.array(cap) for cap in processed_data["capacities"]]
+    processed_data["opening_costs"] = [np.array(cost) for cost in processed_data["opening_costs"]]
+    processed_data["demand"] = np.array(processed_data["demand"], dtype=np.int32)
+
+    # Extract individual components
+    return (
+        processed_data["costs"],
+        processed_data["capacities"],
+        processed_data["demand"],
+        processed_data["budget"],
+        processed_data["opening_costs"],
+    )
+
 @app.route('/solve_genetic_algorithm', methods=['POST'])
 def solve_genetic():
     try:
@@ -353,13 +422,25 @@ def solve_genetic():
         pop_size = int(request.form['pop_size'])
         num_generations = int(request.form['num_generations']) 
 
-        # Process CPLEX solver logic (not implemented here)
-        costs, capacities, demand, budget, opening_costs = generate_problem_data(
-                num_levels, num_facilities, num_clients, num_cap_levels
-            )
+        # costs, capacities, demand, budget, opening_costs = generate_problem_data(
+        #         num_levels, num_facilities, num_clients, num_cap_levels
+        #     )
+        #        # Structure des données pour le fichier
+        # data = {
+        #     "costs": costs,
+        #     "capacities": capacities,
+        #     "demand": demand,
+        #     "budget": budget,
+        #     "opening_costs": opening_costs,
+        # }
+        # # save problem data 
+        # save_data(data, "problem_data.json")
 
+        # Load data from a JSON file
+        costs, capacities, demand, budget, opening_costs = load_data("problem_data.json")
+      
         best_solution, best_fitness,fitness_history = genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budget, opening_costs)
-        print("Best solution found:", best_solution)
+        # print("Best solution found:", best_solution)
         # print("fitness array", fitness_history)
         print("Best fitness value:", best_fitness)
 
@@ -367,10 +448,8 @@ def solve_genetic():
         return render_template('result.html', best_solution=best_solution, best_fitness=best_fitness,fitness_history=fitness_history)
 
     except Exception as e:
+        print(str(e))
         return render_template('index.html', error_message=f"Error: {str(e)}")
-
-
-
 
 
 
