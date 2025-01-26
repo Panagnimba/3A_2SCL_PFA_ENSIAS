@@ -25,33 +25,65 @@ def genetic_solver():
 
 
 
-
+# Convert to a dictionary with values from the arrays
+def convert_to_dict_with_values(arrays):
+    result = {}
+    for arr in arrays:
+        rows, cols = arr.shape
+        for i in range(rows):
+            for j in range(cols):
+                result[(i + 1, j + 1)] = arr[i, j]
+    return  {key: int(value) for key, value in result.items()}
 
 from cplex import Cplex
 from cplex.exceptions import CplexError
 from cplex import SparsePair
 @app.route('/solve_cplex_algorithm', methods=['POST'])
-def solve_genetic_algorithm():
+def solve_cplex_algorithm():
 
     # Problem Parameters
-    N = 5  # Number of clients
-    nfact = 3  # Number of factories
-    nwh = 4  # Number of warehouses
-    K = 3  # Capacity levels for warehouses
-    L = 5  # Assignment levels
+    N = 6  # Number of clients
+    nfact = 6  # Number of factories
+    nwh = 6  # Number of warehouses
+    K = 6  # Capacity levels for warehouses
+    L = 6  # Assignment levels
 
     clients = range(1, N + 1)
+    print(clients)
     warehouses = range(1, nwh + 1)
     levels = range(1, L + 1)
     cap_levels = range(1, K + 1)
 
-    # Data
-    d = {i: 10 for i in clients}  # Demand per client
-    u_wh = {(i, k): 20 for i in warehouses for k in cap_levels}  # Warehouse capacity
-    f_wh = {(i, k): 50 for i in warehouses for k in cap_levels}  # Warehouse opening costs
-    c = {(i, j, l): 5 for i in warehouses for j in clients for l in levels}  # Cost warehouse-client
-    B = 5000  # Total budget
 
+    # Data
+    # d = {i: 10 for i in clients}  # Demand per client
+    # u_wh = {(i, k): 20 for i in warehouses for k in cap_levels}  # Warehouse capacity
+    # f_wh = {(i, k): 50 for i in warehouses for k in cap_levels}  # Warehouse opening costs
+    # c = {(i, j, l): 5 for i in warehouses for j in clients for l in levels}  # Cost warehouse-client
+    # B = 5000  # Total budget
+
+    costs, capacities, demand, budget, opening_costs = load_data("problem_data.json")
+
+    B = budget
+
+    demand = {i+1: demand[i] for i in range(len(demand))}
+    d = {key: int(value) for key, value in demand.items()}
+
+    # Convert the data to the desired dictionary
+    u_wh = convert_to_dict_with_values(capacities)
+
+    f_wh = convert_to_dict_with_values(opening_costs)
+
+    result = {}
+    for i in range(len(costs)):  # Loop through the first dimension (batch or array)
+       # Boucle sur chaque clé, valeur dans le dictionnaire
+        for (x, y), value in costs[i].items():
+            # x et y représentent les indices, value est la valeur associée
+            result[(i+1, x+1, y+1)] = value
+        
+    c = result
+    
+   
     # Initialize CPLEX problem
     problem = Cplex()
     problem.set_problem_type(Cplex.problem_type.LP)
@@ -168,7 +200,7 @@ def solve_genetic_algorithm():
             "objective_value": best_solution,
             "variable_values": {name: value for name, value in zip(variable_names, variable_values)},
         }
-        print(response["variable_values"])
+        # print(response["variable_values"])
         return render_template('cplex_result.html', data=response)
 
     except CplexError as e:
@@ -330,22 +362,6 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
 
     return best_solution, best_fitness,fitness_history
 
-# Run the algorithm
-# num_levels = 5
-# num_facilities = 10
-# num_clients = 15
-# num_cap_levels = 3
-# pop_size = 20
-# num_generations = 50
-
-# costs, capacities, demand, budget, opening_costs = generate_problem_data(
-#     num_levels, num_facilities, num_clients, num_cap_levels
-# )
-
-# best_solution, best_fitness = genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budget, opening_costs)
-# print("Best solution found:", best_solution)
-# print("Best fitness value:", best_fitness)
-
 
 
 
@@ -422,22 +438,24 @@ def solve_genetic():
         pop_size = int(request.form['pop_size'])
         num_generations = int(request.form['num_generations']) 
 
-        # costs, capacities, demand, budget, opening_costs = generate_problem_data(
-        #         num_levels, num_facilities, num_clients, num_cap_levels
-        #     )
-        #        # Structure des données pour le fichier
-        # data = {
-        #     "costs": costs,
-        #     "capacities": capacities,
-        #     "demand": demand,
-        #     "budget": budget,
-        #     "opening_costs": opening_costs,
-        # }
-        # # save problem data 
-        # save_data(data, "problem_data.json")
+
+        costs, capacities, demand, budget, opening_costs = generate_problem_data(
+                num_levels, num_facilities, num_clients, num_cap_levels
+            )
+               # Structure des données pour le fichier
+        data = {
+            "costs": costs,
+            "capacities": capacities,
+            "demand": demand,
+            "budget": budget,
+            "opening_costs": opening_costs,
+        }
+        # save problem data 
+        save_data(data, "problem_data.json")
+
 
         # Load data from a JSON file
-        costs, capacities, demand, budget, opening_costs = load_data("problem_data.json")
+        # costs, capacities, demand, budget, opening_costs = load_data("problem_data.json")
       
         best_solution, best_fitness,fitness_history = genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budget, opening_costs)
         # print("Best solution found:", best_solution)
