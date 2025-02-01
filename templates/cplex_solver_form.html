@@ -4,143 +4,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            padding: 20px;
-            background: linear-gradient(to right, #2c3e50, #4ca1af);
-            background-repeat: no-repeat;
-            background-position: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #072F64;
-            flex-direction: column;
-            font-family: 'Open Sans', sans-serif;
-        }
-
-        .content-wrapper {
-            margin-top: 50px;
-            width: 100%;
-            max-width: 550px;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            text-align: center;
-            color: white;
-            font-size: 1.5em;
-        }
-
-        p,
-        label {
-            text-align: left;
-            color: white;
-            font-size: 1em;
-        }
-
-        form {
-            margin-top: 15px;
-            padding: 20px;
-        }
-
-        .form-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .form-group input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            font-size: 14px;
-            color: #fff;
-            border: none;
-            border-bottom: 2px solid #fff;
-            outline: none;
-            background-color: transparent;
-        }
-
-        .form-group label {
-            position: absolute;
-            top: -10px;
-            left: 0;
-            font-size: 14px;
-            color: #fff;
-        }
-
-        button.styled-button {
-            width: 100%;
-            margin-top: 20px;
-            padding: 10px;
-            color: #ffffff;
-            font-size: 16px;
-            text-transform: uppercase;
-            background-color: green;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-
-        button.styled-button:hover {
-            background-color: rgb(35, 145, 35);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            transition-duration: 0.3s;
-        }
-
-        .error-message {
-            color: red;
-            text-align: center;
-            margin-top: -10px;
-        }
-    </style>
+    <title>Upload Data - CPLEX Solver</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/index.css">
 </head>
 
 <body>
-    <div class="content-wrapper">
-        <h1>CPLEX Solver</h1>
-        <form action="/solve_cplex_algorithm" method="post">
-            <div class="form-group">
-                <input type="number" id="N" name="N" required>
-                <label for="N">Nombre de Clients (N):</label>
-            </div>
-            <div class="form-group">
-                <input type="number" id="nfact" name="nfact" required>
-                <label for="nfact">Nombre d'Usines (nfact):</label>
-            </div>
-            <div class="form-group">
-                <input type="number" id="nwh" name="nwh" required>
-                <label for="nwh">Nombre d'Entrepôts (nwh):</label>
-            </div>
-            <div class="form-group">
-                <input type="number" id="K" name="K" required>
-                <label for="K">Nombre de Niveaux de Capacité pour les Entrepôts (K):</label>
-            </div>
-            <div class="form-group">
-                <input type="number" id="S" name="S" required>
-                <label for="S">Nombre de Niveaux de Capacité pour les Usines (S):</label>
-            </div>
-            <div class="form-group">
-                <input type="number" id="B" name="B" required>
-                <label for="B">Budget Total (B):</label>
-            </div>
-        
-            <button type="submit" class="styled-button">Résoudre</button>
-        
+    <header>
+        <h1>CPLEX Localization Problem Solver</h1>
+        <p>Submit your generated problem data file to solve it using the CPLEX algorithm.</p>
+    </header>
+
+    <section class="cards-container upload-container">
+        <div>
             {% if error_message %}
             <p class="error-message">{{ error_message }}</p>
+            <br />
             {% endif %}
-        </form>        
-    </div>
+            <h3>Upload Problem Data</h3>
+            <p>Submit your generated problem data file to solve it using the CPLEX algorithm.</p>
+            <br />
+            <form class="upload-form" action="/solve_cplex_algorithm" method="POST" enctype="multipart/form-data">
+                <label for="file-upload" class="drop-area" id="dropArea">
+                    <input type="file" id="file-upload" name="file" accept=".txt, .csv, .json" required>
+                    <span>Drag & Drop your file here or <strong>Browse</strong></span>
+                </label>
+                <button type="submit" class="upload-btn">Upload & Solve</button>
+            </form>
+            <br />
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2025 Localization Solver | Designed by 2SCL Team
+    </footer>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.getElementById("file-upload");
+            const dropArea = document.getElementById("dropArea");
+
+            fileInput.addEventListener("change", function () {
+                if (fileInput.files.length > 0) {
+                    dropArea.innerHTML = `<span>Selected File: <strong>${fileInput.files[0].name}</strong></span>`;
+                }
+            });
+
+            dropArea.addEventListener("dragover", (event) => {
+                event.preventDefault();
+                dropArea.style.background = "#e3e3e3";
+            });
+
+            dropArea.addEventListener("dragleave", () => {
+                dropArea.style.background = "";
+            });
+
+            dropArea.addEventListener("drop", (event) => {
+                event.preventDefault();
+                fileInput.files = event.dataTransfer.files;
+                if (fileInput.files.length > 0) {
+                    dropArea.innerHTML = `<span>Selected File: <strong>${fileInput.files[0].name}</strong></span>`;
+                }
+            });
+        });
+
+    </script>
 </body>
 
 </html>
