@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            padding: 20px;
+            background: linear-gradient(to right, #2c3e50, #4ca1af);
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #072F64;
+            flex-direction: column;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .content-wrapper {
+            margin-top: 50px;
+            width: 100%;
+            max-width: 550px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+        }
+
+        p,
+        label {
+            text-align: left;
+            color: white;
+            font-size: 1em;
+        }
+
+        form {
+            margin-top: 15px;
+            padding: 20px;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            font-size: 14px;
+            color: #fff;
+            border: none;
+            border-bottom: 2px solid #fff;
+            outline: none;
+            background-color: transparent;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        button.styled-button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            color: #ffffff;
+            font-size: 16px;
+            text-transform: uppercase;
+            background-color: green;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        button.styled-button:hover {
+            background-color: rgb(35, 145, 35);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition-duration: 0.3s;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-top: -10px;
+        }
+
+        .success-message {
+            color: green;
+            text-align: center;
+            font-weight: bold;
+            margin-top: -10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <h1>Generate Problem Data</h1>
+        {% if success_message %}
+        <br />
+        <p class="success-message">{{ success_message }}</p>
+        <br />
+        {% endif %}
+        <form action="/solve_generate_problem_data" method="post">
+            <div class="form-group">
+                <input type="number" id="num_levels" name="num_levels" min="2" required>
+                <label for="num_levels">Number of Levels:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="num_facilities" name="num_facilities" required>
+                <label for="num_facilities">Number of Facilities:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="num_clients" name="num_clients" required>
+                <label for="num_clients">Number of Clients:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="num_cap_levels" name="num_cap_levels" required>
+                <label for="num_cap_levels">Number of Capacity Levels:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="pop_size" name="pop_size" required>
+                <label for="pop_size">Population Size:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="num_generations" name="num_generations" required>
+                <label for="num_generations">Number of Generations:</label>
+            </div>
+            <div class="form-group">
+                <input type="number" id="budget" name="budget" required>
+                <label for="budget">Budget:</label>
+            </div>
+
+            <button type="submit" class="styled-button">Generate</button>
+        </form>
+        {% if error_message %}
+        <br />
+        <br />
+        <p class="error-message">{{ error_message }}</p>
+        {% endif %}
+        <div style="text-align: center;">
+            <br />
+            <a href="/" style=" color: white; text-decoration: none; font-size: 13px;">Go to the home page</button>
+            <br />
+            <br />
+        </div>
+    </div>
+</body>
+
+</html>

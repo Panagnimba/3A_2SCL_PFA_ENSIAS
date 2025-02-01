@@ -15,13 +15,49 @@ app.debug = True  # Enables auto-reload
 def home():
     return render_template('index.html', show_input_form=True)
 
+@app.route('/generate_data')
+def generate_data():
+    return render_template('generate_data_form.html', show_input_form=True)
+
+
+@app.route('/solve_generate_problem_data', methods=['POST'])
+def solve_generate_data():
+    try:
+       
+       # Extract form data
+        num_levels = int(request.form['num_levels'])
+        num_facilities = int(request.form['num_facilities'])
+        num_clients = int(request.form['num_clients'])
+        num_cap_levels = int(request.form['num_cap_levels'])
+        pop_size = int(request.form['pop_size'])
+        num_generations = int(request.form['num_generations']) 
+        budget = int(request.form['budget']) 
+
+        costs, capacities, demand, budget, opening_costs = generate_problem_data(num_levels, num_facilities, num_clients, num_cap_levels,budget)
+               # Structure des données pour le fichier
+        data = {
+            "costs": costs,
+            "capacities": capacities,
+            "demand": demand,
+            "budget": budget,
+            "opening_costs": opening_costs,
+        }
+        # save problem data 
+        save_data(data, "problem_data.json")
+        return render_template('generate_data_form.html', success_message=f"Successfully generate problem data")
+    except Exception as e:
+        print(str(e))
+        return render_template('generate_data_form.html', error_message=f"Error: {str(e)}")
+
+
+
 @app.route('/cplex_solver')
 def cplex_solver():
-    return render_template('cplex_solver.html', show_input_form=True)
+    return render_template('cplex_solver_form.html', show_input_form=True)
 
 @app.route('/genetic_solver')
 def genetic_solver():
-    return render_template('genetic_solver.html', show_input_form=True)
+    return render_template('genetic_solver_form.html', show_input_form=True)
 
 
 
@@ -209,7 +245,7 @@ def solve_cplex_algorithm():
     
 
 # Generate problem data
-def generate_problem_data(num_levels, num_facilities, num_clients, num_cap_levels):
+def generate_problem_data(num_levels, num_facilities, num_clients, num_cap_levels,budget):
     costs = [
         {(i, j): random.randint(1, 20) for i in range(num_facilities) for j in range(num_clients)}
         for _ in range(num_levels)
@@ -219,7 +255,7 @@ def generate_problem_data(num_levels, num_facilities, num_clients, num_cap_level
         for _ in range(num_levels)
     ]
     demand = np.random.randint(5, 20, size=num_clients)
-    budget = random.randint(100, 500)
+    budget = budget
     opening_costs = [
         np.random.randint(10, 30, size=(num_facilities, num_cap_levels))
         for _ in range(num_levels)
@@ -229,7 +265,6 @@ def generate_problem_data(num_levels, num_facilities, num_clients, num_cap_level
 
 # Evaluate fitness
 def evaluate_fitness(solution, costs, capacities, demand, budget, opening_costs):
-  
     y, x = solution
     total_cost = 0
     penalty = 0
@@ -286,16 +321,14 @@ def repair_solution(solution, capacities, demand):
                 x[l][i] = np.sum(capacities[l][i] * y[l][i]) * (x[l][i] / np.sum(x[l][i]))
     return y, x
 
+
 # Genetic algorithm
-# Array to store the best fitness at each generation
- 
 def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budget, opening_costs):
     fitness_history = [] 
     num_levels = len(capacities)
     num_facilities = capacities[0].shape[0]
     num_clients = len(demand)
     num_cap_levels = capacities[0].shape[1]
-   
 
     def initialize_population():
         population = []
@@ -304,14 +337,14 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
             x = np.random.rand(num_levels, num_facilities, num_clients)
             population.append((y, x))
         return population
-    
+
     def tournament_selection(population, fitness_scores, k=3):
         selected = []
         for _ in range(len(population)):
             tournament = random.sample(list(zip(fitness_scores, population)), k)
             selected.append(min(tournament, key=lambda x: x[0])[1])
         return selected
-    
+
     def crossover(parent1, parent2):
         crossover_point = random.randint(1, num_levels - 1)
         y_child = np.vstack((parent1[0][:crossover_point], parent2[0][crossover_point:]))
@@ -325,14 +358,12 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
                 if random.random() < mutation_rate:
                     y[l][i] = 1 - y[l][i]
         return y, x
-   
+
     population = initialize_population()
-    print(population)
     best_solution = None
     best_fitness = float('inf')
 
     for generation in range(num_generations):
-    
         fitness_scores = [
             evaluate_fitness(sol, costs, capacities, demand, budget, opening_costs)
             for sol in population
@@ -356,12 +387,7 @@ def genetic_algorithm(pop_size, num_generations, costs, capacities, demand, budg
         print(f"Generation {generation}, Best fitness: {best_fitness}")
         fitness_history.append((generation, best_fitness))  # Append to the array
 
-
-
-        
-
-    return best_solution, best_fitness,fitness_history
-
+    return best_solution, best_fitness, fitness_history
 
 
 
