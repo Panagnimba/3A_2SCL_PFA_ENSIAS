@@ -68,11 +68,11 @@
 <body>
     <div class="container">
         <h1>Genetic Solver Results</h1>
-        <p><strong>Best Fitness:</strong> {{ best_fitness }}</p>
+        <p><strong>Best Fitness:</strong> {{ best_fitness-2500 }}</p>
         <p><strong>Fitnes history:</strong></p>
         <ul class="solution-list">
             {% for generation, fitness in fitness_history %}
-                <li>Generation {{ generation }} => Best fitness: {{ "{:.2f}".format(fitness) }}</li>
+                <li>Generation {{ generation }} => Best fitness: {{ "{:.2f}".format(fitness-2500) }}</li>
             {% endfor %}
         </ul>
         <p><strong>Best Solution:</strong></p>
